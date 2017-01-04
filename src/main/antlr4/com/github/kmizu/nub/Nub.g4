@@ -18,6 +18,11 @@ toplevel returns [AstNode.Expression e]
    | x=printExpression {$e = $x.e;}
    | y=ifExpression {$e = $y.e;}
    | z=whileExpression {$e = $z.e;}
+   | f=forExpression {$e = $f.e;}
+   ;
+
+forExpression returns [AstNode.ForExpression e]
+   : FOR v=IDENTIFIER EQ e1=expression TO e2=expression b=block {$e = new AstNode.ForExpression ($v.getText(), $e1.e, $e2.e, $b.e);}
    ;
 
 whileExpression returns [AstNode.WhileExpression e]
@@ -49,7 +54,7 @@ assignment returns [AstNode.Expression e]
     : name=IDENTIFIER EQ x=expression {$e = new AstNode.AssignmentOperation($name.getText(), $x.e);}
     | v=logical {$e = $v.e;}
     ;
-    
+
 logical returns [AstNode.Expression e]
     : l=logical op='&&' r=conditional {$e = new AstNode.BinaryOperation($op.getText(), $l.e, $r.e);}
     | l=logical op='||' r=conditional {$e = new AstNode.BinaryOperation($op.getText(), $l.e, $r.e);}
@@ -113,6 +118,12 @@ ELSE : 'else'
 WHILE : 'while'
    ;
 
+FOR : 'for'
+  ;
+
+TO : 'to'
+  ;
+
 IDENTIFIER
    : IDENTIFIER_START IDENTIFIER_PART*
    ;
@@ -158,4 +169,3 @@ fragment INT :   '0' | [1-9] [0-9]* ; // no leading zeros
 LINE_COMMENT : ('//' (~[\r\n])* (EOF | '\r\n' | '\n' | '\r')) -> skip;
 
 WS  :   [ \t\n\r]+ -> skip ;
-

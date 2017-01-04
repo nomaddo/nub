@@ -79,7 +79,24 @@ public class Evaluator implements AstNode.ExpressionVisitor<Integer> {
         return last;
     }
 
-    @Override
+    public Integer visitForExpression(AstNode.ForExpression node) {
+        Integer last = 0;
+        Integer i = node.init.accept(this);
+        while (true){
+            environment.put (node.variable, i);
+            if (i > node.term.accept(this))
+                break;
+
+            for(AstNode.Expression e:node.body){
+                e.accept(this);
+            }
+
+            i++;
+        }
+
+        return last;
+    }
+
     public Integer visitWhileExpression(AstNode.WhileExpression node) {
         Integer last = 0;
         while(node.condition().accept(this) != 0) {

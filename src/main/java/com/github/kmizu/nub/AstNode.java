@@ -1,6 +1,7 @@
 package com.github.kmizu.nub;
 
 import java.util.List;
+import java.util.Map;
 
 public class AstNode {
     public static interface ExpressionVisitor<E> {
@@ -12,6 +13,7 @@ public class AstNode {
         E visitExpressionList(ExpressionList node);
         E visitIfExpression(IfExpression node);
         E visitWhileExpression(WhileExpression node);
+        E visitForExpression(ForExpression node);
         E visitAssignmentOperation(AssignmentOperation node);
     }
 
@@ -102,6 +104,25 @@ public class AstNode {
         @Override
         public <E> E accept(ExpressionVisitor<E> visitor) {
             return visitor.visitWhileExpression(this);
+        }
+    }
+    public static class ForExpression extends Expression {
+        public final String variable;
+        public final AstNode.Expression init;
+        public final AstNode.Expression term;
+        public final List<AstNode.Expression> body;
+
+        public ForExpression(String variable, AstNode.Expression init, AstNode.Expression term, List<AstNode.Expression> body)
+        {
+            this.variable = variable;
+            this.init = init;
+            this.term = term;
+            this.body = body;
+        }
+
+        @Override
+        public <E> E accept(ExpressionVisitor<E> visitor) {
+            return visitor.visitForExpression(this);
         }
     }
 
