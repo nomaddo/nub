@@ -12,6 +12,7 @@ public class AstNode {
         E visitExpressionList(ExpressionList node);
         E visitIfExpression(IfExpression node);
         E visitWhileExpression(WhileExpression node);
+        E visitForExpression(ForExpression node);
         E visitAssignmentOperation(AssignmentOperation node);
         E visitPrintlnExpression(PrintlnExpression node);
         E visitDefFunction(DefFunction node);
@@ -247,6 +248,25 @@ public class AstNode {
         @Override
         public <E> E accept(ExpressionVisitor<E> visitor) {
             return visitor.visitIdentifier(this);
+        }
+    }
+
+    public static class ForExpression extends  Expression {
+        public final String variable;
+        public final Expression init;
+        public final Expression term;
+        public final List<Expression> block;
+
+        public ForExpression(String variable, Expression init, Expression term, List<Expression> block) {
+            this.block = block;
+            this.variable = variable;
+            this.init = init;
+            this.term = term;
+        }
+
+        @Override
+        public <E> E accept (ExpressionVisitor<E> visitor) {
+            return visitor.visitForExpression(this);
         }
     }
 }

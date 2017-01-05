@@ -22,15 +22,15 @@ public class Main {
         if(args.length == 0) {
             CommonTokenStream stream = streamFrom("def printRange(from, to) { let i = from; while(i < to) { println(i); i = i + 1; } } printRange(1, 10); // Loop");
             AstNode.ExpressionList program = new NubParser(stream).program().e;
-            Evaluator evaluator = new Evaluator();
-            evaluator.evaluate(program);
+            Translator translator = new Translator();
+            System.out.print(translator.compile(program));
         } else {
             String fileName = args[0];
             CommonTokenStream stream = streamFrom(new File(fileName));
             NubParser parser = new NubParser(stream);
             AstNode.ExpressionList program = parser.program().e;
-            Evaluator evaluator = new Evaluator();
-            evaluator.evaluate(program);
+            Translator translator = new Translator();
+            System.out.print(translator.compile(program));
         }
     }
 }
