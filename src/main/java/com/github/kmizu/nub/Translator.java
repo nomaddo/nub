@@ -75,12 +75,19 @@ public class Translator implements AstNode.ExpressionVisitor<List<IL>> {
 
     @Override
     public List<IL> visitPrintExpression(AstNode.PrintExpression node) {
-        return null;
+        List<IL> list = new ArrayList<>();
+        list.addAll(node.target().accept(this));
+        list.add(new IL.Print());
+        return list;
     }
 
     @Override
     public List<IL> visitExpressionList(AstNode.ExpressionList node) {
-        return null;
+        List<IL> list = new ArrayList<>();
+        for (AstNode.Expression e: node.expressions()){
+            list.addAll(e.accept(this));
+        }
+        return list;
     }
 
     @Override
