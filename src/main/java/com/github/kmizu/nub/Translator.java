@@ -9,7 +9,7 @@ import java.util.List;
  * Created by nomaddo on 2017/01/04.
  */
 public class Translator implements AstNode.ExpressionVisitor<List<IL>> {
-    private int id = 0;
+    private int id = -1;
     private HashMap<String, Integer> compEnv = new HashMap<>();
 
     private int gensym()
@@ -33,12 +33,16 @@ public class Translator implements AstNode.ExpressionVisitor<List<IL>> {
         {
             case "+":
                 il = new IL.Iadd();
+                break;
             case "-":
                 il = new IL.Isub();
+                break;
             case "*":
                 il = new IL.Imul();
+                break;
             case "/":
                 il = new IL.Idiv();
+                break;
             default:
                 assert(false);
         }
