@@ -18,19 +18,32 @@ public class Main {
         NubLexer lexer = new NubLexer(antlrStream);
         return new CommonTokenStream(lexer);
     }
+
+    private static void printStub() {
+        System.out.println(".class public static NubMain");
+        System.out.println(".super java/lang/Object");
+        System.out.println(".method public static main([Ljava/lang/String;)V");
+    }
+
+    private static void printStubEnd() {
+        System.out.println(".end method");
+    }
+
     public static void main(String[] args) throws IOException{
+        CommonTokenStream stream;
+
         if(args.length == 0) {
-            CommonTokenStream stream = streamFrom("def printRange(from, to) { let i = from; while(i < to) { println(i); i = i + 1; } } printRange(1, 10); // Loop");
-            AstNode.ExpressionList program = new NubParser(stream).program().e;
-            Translator translator = new Translator();
-            System.out.print(translator.compile(program));
+            stream = streamFrom("def printRange(from, to) { let i = from; while(i < to) { println(i); i = i + 1; } } printRange(1, 10); // Loop");
         } else {
             String fileName = args[0];
-            CommonTokenStream stream = streamFrom(new File(fileName));
-            NubParser parser = new NubParser(stream);
-            AstNode.ExpressionList program = parser.program().e;
-            Translator translator = new Translator();
-            System.out.print(translator.compile(program));
+            stream = streamFrom(new File(fileName));
         }
+
+        NubParser parser = new NubParser(stream);
+        AstNode.ExpressionList program = parser.program().e;
+        Translator translator = new Translator();
+        printStub();
+        translator.compile(program);
+        printStubEnd();
     }
 }

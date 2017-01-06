@@ -10,16 +10,21 @@ import java.util.List;
  */
 public class Translator implements AstNode.ExpressionVisitor<List<IL>> {
     private int id = -1;
+    private int label = 0;
     private HashMap<String, Integer> compEnv = new HashMap<>();
 
-    private int gensym()
-    {
+    private int gensym() {
         id++;
         return id;
     }
 
-    public String compile(AstNode.Expression program) {
-        return program.accept(this).toString();
+    public String gensymLabel(String arg){
+        Integer i = label++;
+        return arg.concat(i.toString());
+    }
+
+    public void compile(AstNode.Expression program) {
+        program.accept(this).forEach(il -> System.out.println(il.toString()));
     }
 
     @Override
@@ -44,7 +49,7 @@ public class Translator implements AstNode.ExpressionVisitor<List<IL>> {
                 il = new IL.Idiv();
                 break;
             default:
-                assert(false);
+                throw new RuntimeException("cannot reach here");
         }
 
         list.add(il);
@@ -96,7 +101,46 @@ public class Translator implements AstNode.ExpressionVisitor<List<IL>> {
 
     @Override
     public List<IL> visitIfExpression(AstNode.IfExpression node) {
-        return null;
+        IL il = null;
+        List<IL> list = new ArrayList<>();
+
+        String thenLabel = gensymLabel("then");
+        String endLabel  = gensymLabel("end");
+
+        if (node.condition() instanceof  AstNode.BinaryOperation) {
+            AstNode.BinaryOperation e = (AstNode.BinaryOperation)node.condition();
+            list.addAll(e.lhs().accept(this));
+            list.addAll(e.rhs().accept(this));
+            switch (e.operator()){
+                case "==":
+                    il = new IL.If_icmpeq(thenLabel);
+                    break;
+                case "<=":
+                    il = new IL.If_icmple(thenLabel);
+                    break;
+                case ">=":
+                    il = new IL.If_icmpge(thenLabel);
+                    break;
+                case ">":
+                    il = new IL.If_icmpgt(thenLabel);
+                    break;
+                case "<":
+                    il = new IL.If_icmplt(thenLabel);
+                    break;
+            }
+            list.add(il);
+        } else {
+            list.addAll(node.condition().accept(this));
+            list.add(new IL.Ldc(0));
+            list.add(new IL.If_icmpeq (thenLabel));
+        }
+
+        node.elseClause().forEach(e -> list.addAll (e.accept(this)));
+        list.add(new IL.Goto(endLabel));
+        list.add(new IL.Label(thenLabel));
+        node.thenClause().forEach(e -> list.addAll (e.accept(this)));
+        list.add(new IL.Label(endLabel));
+        return list;
     }
 
     @Override
@@ -111,7 +155,14 @@ public class Translator implements AstNode.ExpressionVisitor<List<IL>> {
 
     @Override
     public List<IL> visitAssignmentOperation(AstNode.AssignmentOperation node) {
-        return null;
+        if(! compEnv.containsKey(node.variableName())){
+            throw new NubRuntimeException("variable " + node.variableName() + " is not defined");
+        }
+        Integer id = compEnv.get(node.variableName());
+        List<IL> list = new ArrayList<>();
+        list.addAll(node.expression().accept(this));
+        list.add(new IL.Istore(id));
+        return list;
     }
 
     @Override
